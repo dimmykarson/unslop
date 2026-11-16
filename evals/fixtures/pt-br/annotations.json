@@ -1,17 +1,68 @@
 {
-  "description": "Amostras pt-BR para o teste manual da fase 1 (CA1-CA5) e casos vermelhos da fase 2 (CA7). Textos fictícios.",
+  "description": "Amostras pt-BR para o teste manual da fase 1 (CA1-CA5) e casos vermelhos da fase 2 (CA7). Textos fictícios. 'scanner_must_flag' lista o subconjunto que banned_phrase_scan deve apontar (fase 2, CA7); o restante de 'must_remove' fica para o julgamento do modelo.",
   "cases": {
     "01-relatorio-slop.txt": {
       "expect": "rewrite",
-      "must_remove": ["No cenário atual", "desempenha um papel fundamental", "Vale ressaltar que", "contribuindo para o fortalecimento", "Não se trata apenas de", "robusta e inovadora", "Em suma", "as possibilidades são infinitas"],
-      "must_preserve": ["outubro de 2026", "1.284", "12%", "setembro", "6 servidores", "agendamento on-line", "25", "9 minutos", "Seção de Atendimento"],
-      "must_not_add": "nenhum número, prazo, causa ou juízo ausente do original"
+      "must_remove": [
+        "No cenário atual",
+        "desempenha um papel fundamental",
+        "Vale ressaltar que",
+        "contribuindo para o fortalecimento",
+        "Não se trata apenas de",
+        "robusta e inovadora",
+        "Em suma",
+        "as possibilidades são infinitas"
+      ],
+      "must_preserve": [
+        "outubro de 2026",
+        "1.284",
+        "12%",
+        "setembro",
+        "6 servidores",
+        "agendamento on-line",
+        "25",
+        "9 minutos",
+        "Seção de Atendimento"
+      ],
+      "must_not_add": "nenhum número, prazo, causa ou juízo ausente do original",
+      "scanner_must_flag": [
+        "no cenário atual",
+        "desempenha um papel fundamental",
+        "vale ressaltar que",
+        "contribuindo para o fortalecimento",
+        "não se trata apenas de",
+        "em suma",
+        "as possibilidades são infinitas"
+      ]
     },
     "02-email-slop.txt": {
       "expect": "rewrite",
-      "must_remove": ["Espero que esta mensagem os encontre bem", "É importante destacar que", "vamos mergulhar", "endereçar", "Vou estar enviando"],
-      "must_preserve": ["Prezados,", "quinta-feira, 4 de dezembro", "14h", "sala 203", "Secretaria de TI", "até amanhã", "até quarta-feira", "Atenciosamente,", "Coordenação do Projeto"],
-      "must_not_add": "nenhum horário, local ou compromisso novo"
+      "must_remove": [
+        "Espero que esta mensagem os encontre bem",
+        "É importante destacar que",
+        "vamos mergulhar",
+        "endereçar",
+        "Vou estar enviando"
+      ],
+      "must_preserve": [
+        "Prezados,",
+        "quinta-feira, 4 de dezembro",
+        "14h",
+        "sala 203",
+        "Secretaria de TI",
+        "até amanhã",
+        "até quarta-feira",
+        "Atenciosamente,",
+        "Coordenação do Projeto"
+      ],
+      "must_not_add": "nenhum horário, local ou compromisso novo",
+      "scanner_must_flag": [
+        "espero que esta mensagem os encontre bem",
+        "é importante destacar que",
+        "vamos mergulhar",
+        "endereçar as pendências",
+        "vou estar enviando"
+      ]
     },
     "03-oficial-limpo.txt": {
       "expect": "unchanged",

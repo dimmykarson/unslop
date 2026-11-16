@@ -32,6 +32,7 @@ from _lang import (  # noqa: E402
     ENGLISH_FUNCTION_WORDS,
     english_function_share,
     is_probably_english,
+    should_route_portuguese,
 )
 
 
@@ -699,6 +700,15 @@ def scan_for_violations(text: str, include_quoted: bool = False) -> list[Violati
         p["category"] for p in STRUCTURAL_PATTERNS if int(p.get("min_matches", "1")) > 1
     }
 
+    return _drop_contained_and_sort(violations, spans, freq_gated)
+
+
+def _drop_contained_and_sort(
+    violations: list[Violation],
+    spans: list[tuple[int, int]],
+    freq_gated: set[str] | frozenset[str] = frozenset(),
+) -> list[Violation]:
+    """Drop findings strictly enclosed by a larger finding, then sort by position."""
     # Linear containment sweep, equivalent to the O(n^2) "any other strictly
     # larger span fully encloses mine" check above, but O(n log n): sort by
     # (start ascending, end descending) and sweep once. For any two spans with
@@ -740,6 +750,85 @@ def scan_for_violations(text: str, include_quoted: bool = False) -> list[Violati
     return violations
 
 
+# --- pt-BR pack (docs/specs/pt-br.md, phase 2) -------------------------------
+# Data lives in references/pt-br/phrases.json so the catalog can grow without
+# touching code. Unicode word boundaries replace the ASCII ones above, which
+# break on accented letters ("não", "questões").
+
+PT_BR_PACK_PATH = HERE.parent / "references" / "pt-br" / "phrases.json"
+_pt_br_pack: dict | None = None
+
+
+def _unicode_phrase_pattern(phrase: str) -> re.Pattern[str]:
+    left = r"(?<![\w-])" if phrase[0].isalnum() else ""
+    right = r"(?![\w-])" if phrase[-1].isalnum() else ""
+    return re.compile(left + re.escape(phrase) + right, re.IGNORECASE)
+
+
+def load_pt_br_pack() -> dict:
+    global _pt_br_pack
+    if _pt_br_pack is None:
+        data = json.loads(PT_BR_PACK_PATH.read_text(encoding="utf-8"))
+        for entry in data["phrases"]:
+            entry["_regex"] = _unicode_phrase_pattern(entry["phrase"])
+        for entry in data["patterns"]:
+            entry["_regex"] = re.compile(entry["pattern"], re.IGNORECASE)
+        for entry in data["phrases"] + data["patterns"]:
+            entry["_unless"] = re.compile(entry["unless"]) if entry.get("unless") else None
+        _pt_br_pack = data
+    return _pt_br_pack
+
+
+def scan_for_violations_ptbr(text: str, include_quoted: bool = False) -> list[Violation]:
+    """Scan pt-BR text with the compact high-signal pack in phrases.json."""
+    pack = load_pt_br_pack()
+    violations: list[Violation] = []
+    spans: list[tuple[int, int]] = []
+    scan_text = mask_ignored_spans(text, include_quoted=include_quoted)
+    scan_text_lower = scan_text.lower()
+    line_starts = _line_starts(text)
+    line_context_cache: dict[int, str] = {}
+
+    def add(entry: dict, start: int, end: int, phrase: str) -> None:
+        unless = entry["_unless"]
+        if unless is not None and unless.search(_sentence_context(scan_text, start, end)):
+            return
+        line_num, column, context = _line_col_context(text, line_starts, start, line_context_cache)
+        violations.append({
+            "phrase": phrase,
+            "category": entry["category"],
+            "severity": entry["severity"],
+            "line_number": line_num,
+            "column": column,
+            "context": context,
+            "suggestion": entry["suggestion"],
+        })
+        spans.append((start, end))
+
+    for entry in pack["phrases"]:
+        if entry["phrase"] not in scan_text_lower:
+            continue
+        for match in entry["_regex"].finditer(scan_text):
+            add(entry, match.start(), match.end(), entry["phrase"])
+
+    for entry in pack["patterns"]:
+        for match in entry["_regex"].finditer(scan_text):
+            group = "finding" if "finding" in match.re.groupindex else 0
+            start, end = match.span(group)
+            add(entry, start, end, match.group(group).lower())
+
+    return _drop_contained_and_sort(violations, spans)
+
+
+def _summarize(violations: list[Violation]) -> tuple[dict[str, int], dict[str, int]]:
+    categories: dict[str, int] = {}
+    by_severity: dict[str, int] = {"hard": 0, "soft": 0}
+    for v in violations:
+        categories[v["category"]] = categories.get(v["category"], 0) + 1
+        by_severity[v["severity"]] = by_severity.get(v["severity"], 0) + 1
+    return categories, by_severity
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input_file", nargs="?", help="Optional input file. Reads stdin when omitted.")
@@ -747,6 +836,13 @@ def parse_args() -> argparse.Namespace:
         "--include-quoted",
         action="store_true",
         help="Scan quoted examples and markdown blockquotes instead of skipping them.",
+    )
+    parser.add_argument(
+        "--lang",
+        choices=("auto", "en", "pt-br"),
+        default="auto",
+        help="Catalog language. auto routes pt-BR text to the pt-BR pack and keeps "
+        "every other input on the English path (default: auto).",
     )
     return parser.parse_args()
 
@@ -769,6 +865,18 @@ def main() -> None:
         print(json.dumps({"error": "No input provided", "violations": []}))
         sys.exit(1)
 
+    if args.lang == "pt-br" or (args.lang == "auto" and should_route_portuguese(text)):
+        violations = scan_for_violations_ptbr(text, include_quoted=args.include_quoted)
+        categories, by_severity = _summarize(violations)
+        print(json.dumps({
+            "language": "pt-br",
+            "total_violations": len(violations),
+            "by_severity": by_severity,
+            "by_category": categories,
+            "violations": violations,
+        }, indent=2, ensure_ascii=False))
+        sys.exit(1 if violations else 0)
+
     violations = scan_for_violations(text, include_quoted=args.include_quoted)
 
     # English-only graceful decline. Function-word absence alone is not evidence
@@ -780,12 +888,7 @@ def main() -> None:
         print("note: input appears non-English; scanner declined (English-only).", file=sys.stderr)
         sys.exit(0)
 
-    # Group by category for summary
-    categories: dict[str, int] = {}
-    by_severity: dict[str, int] = {"hard": 0, "soft": 0}
-    for v in violations:
-        categories[v["category"]] = categories.get(v["category"], 0) + 1
-        by_severity[v["severity"]] = by_severity.get(v["severity"], 0) + 1
+    categories, by_severity = _summarize(violations)
 
     output = {
         "total_violations": len(violations),

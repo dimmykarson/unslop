@@ -1,6 +1,6 @@
 # /unslop rewrite
 
-Read [the core contract](../core-contract.md). Read the source before looking at scanner output. From the skill root, with `INPUT` set to the source text:
+Read [the core contract](../core-contract.md). Read the source before looking at scanner output. For Portuguese (pt-BR) input, follow the flow in [references/pt-br/README.md](../pt-br/README.md) instead of the block below. From the skill root, with `INPUT` set to the source text:
 
 ```bash
 python3 scripts/extract_constraints.py <<< "$INPUT"

@@ -1,0 +1,455 @@
+{
+  "version": 1,
+  "language": "pt-br",
+  "description": "Pacote enxuto de alto sinal para banned_phrase_scan.py em pt-BR. Só expressões fortes e literais; o vocabulário amplo fica no catálogo (taboo-phrases.md) para o modelo julgar. Cada entrada traz um exemplo que deve ser apontado; 'protects' lista textos que não podem ser apontados. 'unless' é uma expressão regular avaliada na frase, sensível a maiúsculas (use (?i:...) nas palavras): se casar, o achado é suprimido.",
+  "phrases": [
+    {
+      "phrase": "vale ressaltar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "Vale ressaltar que o prazo mudou."
+    },
+    {
+      "phrase": "vale destacar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "Vale destacar que a reunião foi adiada."
+    },
+    {
+      "phrase": "vale lembrar que",
+      "category": "throat_clearing",
+      "severity": "soft",
+      "suggestion": "Apagar, salvo lembrete realmente necessário.",
+      "example": "Vale lembrar que o sistema fica fora do ar à noite."
+    },
+    {
+      "phrase": "é importante destacar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "É importante destacar que a nova data é 28 de novembro."
+    },
+    {
+      "phrase": "é importante ressaltar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "É importante ressaltar que o formulário mudou."
+    },
+    {
+      "phrase": "é importante salientar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "É importante salientar que o prazo é improrrogável."
+    },
+    {
+      "phrase": "cabe destacar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "Cabe destacar que a equipe cresceu."
+    },
+    {
+      "phrase": "cabe ressaltar que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e começar pela informação.",
+      "example": "Cabe ressaltar que o edital foi publicado."
+    },
+    {
+      "phrase": "é fundamental entender que",
+      "category": "throat_clearing",
+      "severity": "hard",
+      "suggestion": "Apagar e afirmar diretamente.",
+      "example": "É fundamental entender que a regra mudou."
+    },
+    {
+      "phrase": "sem mais delongas",
+      "category": "meta",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Sem mais delongas, vamos ao resultado."
+    },
+    {
+      "phrase": "confira a seguir",
+      "category": "meta",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Confira a seguir os principais pontos da reunião."
+    },
+    {
+      "phrase": "continue lendo para",
+      "category": "meta",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Continue lendo para saber como pedir o benefício."
+    },
+    {
+      "phrase": "ao longo deste guia",
+      "category": "meta",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Ao longo deste guia, você vai entender o processo."
+    },
+    {
+      "phrase": "mergulho profundo",
+      "category": "ai_vocabulary",
+      "severity": "hard",
+      "suggestion": "Examinar, detalhar.",
+      "example": "Fizemos um mergulho profundo nos dados do trimestre."
+    },
+    {
+      "phrase": "um verdadeiro divisor de águas",
+      "category": "ai_vocabulary",
+      "severity": "hard",
+      "suggestion": "Dizer o que mudou.",
+      "example": "O novo sistema foi um verdadeiro divisor de águas para a equipe."
+    },
+    {
+      "phrase": "destravar o potencial",
+      "category": "ai_vocabulary",
+      "severity": "hard",
+      "suggestion": "Dizer o resultado.",
+      "example": "A ferramenta ajuda a destravar o potencial dos servidores."
+    },
+    {
+      "phrase": "desbloquear o potencial",
+      "category": "ai_vocabulary",
+      "severity": "hard",
+      "suggestion": "Dizer o resultado.",
+      "example": "O curso promete desbloquear o potencial de cada equipe."
+    },
+    {
+      "phrase": "no cenário atual",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Apagar ou dar a data.",
+      "example": "No cenário atual, a seção atende o público."
+    },
+    {
+      "phrase": "nos dias de hoje",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Apagar ou dar a data.",
+      "example": "Nos dias de hoje, todos usam o celular."
+    },
+    {
+      "phrase": "representa um marco",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Dizer o que mudou, com dado.",
+      "example": "A nova portaria representa um marco para o Tribunal."
+    },
+    {
+      "phrase": "é um testemunho de",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "O resultado é um testemunho de dedicação da equipe."
+    },
+    {
+      "phrase": "redefine a forma como",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Dizer o efeito concreto.",
+      "example": "A plataforma redefine a forma como trabalhamos."
+    },
+    {
+      "phrase": "especialistas apontam",
+      "category": "vague_attribution",
+      "severity": "hard",
+      "suggestion": "Nomear a fonte ou apagar a atribuição.",
+      "example": "Especialistas apontam que o uso de IA vai crescer.",
+      "unless": "(?i:especialistas\\s+d[oa]s?)\\s+[A-ZÀ-Ý]|\\([^)]*\\d{4}[^)]*\\)"
+    },
+    {
+      "phrase": "estudos mostram",
+      "category": "vague_attribution",
+      "severity": "hard",
+      "suggestion": "Citar o estudo.",
+      "example": "Estudos mostram que equipes menores entregam mais.",
+      "unless": "\\([^)]*\\d{4}[^)]*\\)|(?i:\\bde acordo com)\\s+[A-ZÀ-Ý]"
+    },
+    {
+      "phrase": "pesquisas indicam",
+      "category": "vague_attribution",
+      "severity": "hard",
+      "suggestion": "Citar a pesquisa.",
+      "example": "Pesquisas indicam que o atendimento melhorou.",
+      "unless": "\\([^)]*\\d{4}[^)]*\\)|(?i:\\bde acordo com)\\s+[A-ZÀ-Ý]"
+    },
+    {
+      "phrase": "segundo especialistas",
+      "category": "vague_attribution",
+      "severity": "hard",
+      "suggestion": "Nomear os especialistas.",
+      "example": "Segundo especialistas, a mudança é positiva.",
+      "unless": "(?i:segundo especialistas\\s+d[oa]s?)\\s+[A-ZÀ-Ý]"
+    },
+    {
+      "phrase": "é amplamente reconhecido",
+      "category": "vague_attribution",
+      "severity": "hard",
+      "suggestion": "Apagar ou citar.",
+      "example": "É amplamente reconhecido que o método funciona."
+    },
+    {
+      "phrase": "não se trata apenas de",
+      "category": "negative_parallelism",
+      "severity": "hard",
+      "suggestion": "Dizer a ideia principal; se ela for vazia, apagar a frase.",
+      "example": "Não se trata apenas de tecnologia, mas de pessoas."
+    },
+    {
+      "phrase": "não se trata só de",
+      "category": "negative_parallelism",
+      "severity": "hard",
+      "suggestion": "Dizer a ideia principal; se ela for vazia, apagar a frase.",
+      "example": "Não se trata só de números, trata-se de gente."
+    },
+    {
+      "phrase": "em suma",
+      "category": "conclusion_scaffold",
+      "severity": "soft",
+      "suggestion": "Apagar; se o parágrafo só recapitula, apagar o parágrafo.",
+      "example": "Em suma, o projeto foi um sucesso."
+    },
+    {
+      "phrase": "por fim, mas não menos importante",
+      "category": "conclusion_scaffold",
+      "severity": "hard",
+      "suggestion": "Por fim,",
+      "example": "Por fim, mas não menos importante, agradecemos à equipe."
+    },
+    {
+      "phrase": "as possibilidades são infinitas",
+      "category": "generic_conclusion",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Com a nova ferramenta, as possibilidades são infinitas."
+    },
+    {
+      "phrase": "ótima pergunta",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Ótima pergunta! O prazo é de 15 dias."
+    },
+    {
+      "phrase": "excelente pergunta",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Excelente pergunta. O formulário está no portal."
+    },
+    {
+      "phrase": "espero ter ajudado",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Segue o resumo. Espero ter ajudado!"
+    },
+    {
+      "phrase": "espero que isso ajude",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Aqui está a tabela. Espero que isso ajude."
+    },
+    {
+      "phrase": "como modelo de linguagem",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Como modelo de linguagem, não tenho acesso ao sistema."
+    },
+    {
+      "phrase": "até a minha última atualização",
+      "category": "knowledge_cutoff",
+      "severity": "hard",
+      "suggestion": "Apagar e conferir a informação.",
+      "example": "Até a minha última atualização, a lei estava em vigor."
+    },
+    {
+      "phrase": "se precisar de mais alguma coisa",
+      "category": "assistant_artifact",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Se precisar de mais alguma coisa, é só pedir."
+    },
+    {
+      "phrase": "tudo o que você precisa saber",
+      "category": "promotional",
+      "severity": "hard",
+      "suggestion": "Dizer o que o texto cobre.",
+      "example": "Tudo o que você precisa saber sobre o novo sistema."
+    },
+    {
+      "phrase": "imperdível",
+      "category": "promotional",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "O curso é imperdível para os servidores."
+    },
+    {
+      "phrase": "você já se perguntou",
+      "category": "rhetorical_question",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Você já se perguntou como funciona a urna?"
+    },
+    {
+      "phrase": "mas afinal, o que é",
+      "category": "rhetorical_question",
+      "severity": "hard",
+      "suggestion": "Dizer o que é.",
+      "example": "Mas afinal, o que é inteligência artificial?"
+    },
+    {
+      "phrase": "consiste em ser",
+      "category": "copula_avoidance",
+      "severity": "hard",
+      "suggestion": "é",
+      "example": "O laboratório consiste em ser um espaço de testes."
+    },
+    {
+      "phrase": "no final do dia",
+      "category": "calque",
+      "severity": "soft",
+      "suggestion": "No fim das contas — ou apagar.",
+      "example": "No final do dia, o importante é entregar.",
+      "unless": "(?i:no final do dia\\s+(?:\\d|de\\b|seguinte|anterior|útil|em que))"
+    }
+  ],
+  "patterns": [
+    {
+      "id": "espero-mensagem-encontre-bem",
+      "pattern": "\\bespero que (?:esta|essa) mensagem (?:o|a|os|as|lhe|te|vos) encontre bem",
+      "category": "calque",
+      "severity": "hard",
+      "suggestion": "Apagar (decalque de 'I hope this message finds you well').",
+      "example": "Espero que esta mensagem os encontre bem! A reunião mudou."
+    },
+    {
+      "id": "neste-artigo-vamos",
+      "pattern": "\\bneste (?:artigo|texto|post|guia|conteúdo), (?:vamos|iremos|você vai)\\b",
+      "category": "meta",
+      "severity": "hard",
+      "suggestion": "Apagar; dizer o assunto no título.",
+      "example": "Neste artigo, vamos explorar o novo sistema."
+    },
+    {
+      "id": "vamos-mergulhar",
+      "pattern": "\\b(?:vamos|vou|iremos)\\s+mergulhar\\b",
+      "category": "ai_vocabulary",
+      "severity": "hard",
+      "suggestion": "Examinar, detalhar, discutir.",
+      "example": "Nesta reunião, vamos mergulhar nos próximos passos."
+    },
+    {
+      "id": "desempenha-papel",
+      "pattern": "\\bdesempenha(?:m|r|ndo|va|vam)?\\s+(?:um\\s+)?papel\\s+(?:fundamental|crucial|essencial|central|primordial|importante|decisivo|chave)\\b",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Dizer o que faz, se o texto disser; se não, apagar a frase.",
+      "example": "A seção desempenha um papel fundamental no atendimento."
+    },
+    {
+      "id": "mundo-cada-vez-mais",
+      "pattern": "\\bem um mundo cada vez mais\\s+[a-zà-ÿ]+",
+      "category": "significance_inflation",
+      "severity": "hard",
+      "suggestion": "Apagar.",
+      "example": "Em um mundo cada vez mais digital, a IA chegou ao serviço público."
+    },
+    {
+      "id": "gerundio-efeito-vazio",
+      "pattern": ",\\s+(?P<finding>(?:contribuindo|garantindo|promovendo|reforçando|fortalecendo|consolidando|potencializando|impulsionando)(?:\\s+assim)?(?:\\s+[a-zà-ÿ]+){1,3})",
+      "category": "superficial_ing",
+      "severity": "hard",
+      "suggestion": "Apagar ou nova frase com o efeito medido.",
+      "example": "Foram 400 atendimentos, contribuindo para o fortalecimento do serviço."
+    },
+    {
+      "id": "gerundismo",
+      "pattern": "\\b(?:vou|vamos|vai|vão|irá|irão|irei|iremos)\\s+estar\\s+[a-zà-ÿ]+ndo\\b",
+      "category": "superficial_ing",
+      "severity": "hard",
+      "suggestion": "Vou enviar, vamos analisar.",
+      "example": "Vou estar enviando a pauta até amanhã."
+    },
+    {
+      "id": "nao-e-sobre",
+      "pattern": "\\bnão é (?:apenas |só )?sobre [^.?!]{1,60}[.,;—–-]\\s*é sobre\\b",
+      "category": "negative_parallelism",
+      "severity": "hard",
+      "suggestion": "Dizer a ideia principal.",
+      "example": "Não é sobre tecnologia. É sobre pessoas."
+    },
+    {
+      "id": "enderecar-problema",
+      "pattern": "\\bendereç(?:ar|ou|ando|amos|ará|arão|em|ado|ada|ados|adas)\\s+(?:(?:o|a|os|as|um|uma|essas?|esses?|estas?|estes?|nossas?|nossos?)\\s+)?(?:problemas?|questões|questão|desafios?|pendências?|demandas?|pontos?|preocupações?|riscos?|lacunas?)\\b",
+      "category": "calque",
+      "severity": "hard",
+      "suggestion": "Tratar, resolver, enfrentar.",
+      "example": "Precisamos endereçar essa questão antes da auditoria."
+    },
+    {
+      "id": "aplicar-para-vaga",
+      "pattern": "\\baplic(?:ar|ou|ei|amos|aram)\\s+para\\s+(?:uma\\s+|a\\s+)?vaga",
+      "category": "calque",
+      "severity": "hard",
+      "suggestion": "Candidatar-se a.",
+      "example": "Ele vai aplicar para uma vaga na Secretaria."
+    },
+    {
+      "id": "proximo-nivel",
+      "pattern": "\\b(?:leve|levar|leva|levamos|levou)\\s+[^.?!]{0,40}\\bao próximo nível\\b",
+      "category": "promotional",
+      "severity": "hard",
+      "suggestion": "Dizer o ganho.",
+      "example": "Leve sua produtividade ao próximo nível com a nova ferramenta."
+    }
+  ],
+  "protects": [
+    {
+      "text": "Senhor Presidente,\n\n1. Encaminho à apreciação de Vossa Excelência a minuta anexa, nos termos da Resolução CNJ nº 615/2025.\n\n2. Diante do exposto, solicito a aprovação da minuta.\n\nRespeitosamente,",
+      "note": "redação oficial"
+    },
+    {
+      "text": "Utilizou-se um estimador robusto, e o resultado mostrou-se robusto a diferentes recortes. No que tange à amostra, foram considerados 3.412 processos.",
+      "note": "termos técnicos e registro formal"
+    },
+    {
+      "text": "A Secretaria vai endereçar a correspondência ao gabinete da Presidência ainda hoje.",
+      "note": "endereçar no sentido literal"
+    },
+    {
+      "text": "No final do dia 12, o sistema foi restabelecido pela equipe de plantão.",
+      "note": "no final do dia com data"
+    },
+    {
+      "text": "Segundo especialistas do IBGE, estudos mostram (Silva, 2021) que a amostra é representativa.",
+      "note": "atribuição com fonte"
+    },
+    {
+      "text": "O mergulhador vai mergulhar no lago às 10h para recolher o equipamento.",
+      "note": "mergulhar literal"
+    },
+    {
+      "text": "A atriz desempenha o papel principal na peça desta noite.",
+      "note": "papel teatral"
+    },
+    {
+      "text": "Os técnicos trabalharam a noite toda, revisando os relatórios da eleição.",
+      "note": "gerúndio legítimo"
+    },
+    {
+      "text": "Caso precise de esclarecimentos, coloco-me à disposição. Atenciosamente,",
+      "note": "fecho formal"
+    }
+  ]
+}

@@ -57,6 +57,53 @@ def is_probably_english(text: str, threshold: float = 0.10, min_tokens: int = 15
     return english_function_share(text) >= threshold
 
 
+# Portuguese function words, chosen to be ABSENT from Spanish and English so a
+# Spanish or English paragraph scores near zero: Spanish shares "de", "que",
+# "para", "como", "no", "a", "o"; English shares "as", "do". Contractions
+# ("da", "ao", "à", "pelo") and nasal forms ("não", "são") are the strongest
+# signal. Used only to route pt-BR text to its own catalog (docs/specs/pt-br.md).
+PORTUGUESE_FUNCTION_WORDS = frozenset({
+    "não", "são", "é", "uma", "umas", "uns", "um", "também", "você", "vocês",
+    "pelo", "pela", "pelos", "pelas", "da", "dos", "das", "na", "nas", "ao",
+    "aos", "à", "às", "num", "numa", "isso", "isto", "está", "estão", "estava",
+    "foi", "foram", "seu", "sua", "seus", "suas", "muito", "muita", "já",
+    "após", "até", "então", "porém", "ainda", "mais", "ou", "em", "com", "os",
+    "ele", "ela", "eles", "elas", "esse", "essa", "esses", "essas", "pode",
+    "há", "tem", "têm", "sem", "nós",
+})
+_ACCENTED_WORD_RE = re.compile(r"[a-zà-ÿ']+")
+_PORTUGUESE_MARKERS_RE = re.compile(r"ção|ções|ão\b|ões\b|ç", re.IGNORECASE)
+
+
+def portuguese_function_share(text: str) -> float:
+    """Share of word tokens that are distinctively Portuguese function words."""
+    tokens = _ACCENTED_WORD_RE.findall(text.lower())
+    if not tokens:
+        return 0.0
+    hits = sum(1 for t in tokens if t in PORTUGUESE_FUNCTION_WORDS)
+    return hits / len(tokens)
+
+
+def is_probably_portuguese(text: str, threshold: float = 0.08, min_tokens: int = 15) -> bool:
+    """Cheap pt-BR detector. Short texts need an orthographic marker (ç, -ção,
+    -ão) plus one Portuguese function word, because function-word share is too
+    noisy below ``min_tokens``."""
+    tokens = _ACCENTED_WORD_RE.findall(text.lower())
+    if not tokens:
+        return False
+    if len(tokens) < min_tokens:
+        return bool(_PORTUGUESE_MARKERS_RE.search(text)) and any(
+            t in PORTUGUESE_FUNCTION_WORDS for t in tokens
+        )
+    return portuguese_function_share(text) >= threshold
+
+
+def should_route_portuguese(text: str) -> bool:
+    """Auto-mode routing: pt-BR only when the text fails the English check AND
+    passes the Portuguese one, so every English input keeps its original path."""
+    return not is_probably_english(text) and is_probably_portuguese(text)
+
+
 def words(text: str) -> list[str]:
     return re.findall(r"[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)?", text.lower())
 

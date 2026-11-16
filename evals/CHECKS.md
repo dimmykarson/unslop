@@ -56,6 +56,16 @@ are separate engineering-health scoreboards. They do not establish core
 detection or repair quality and are not counted as product evidence. Run the
 relevant scoreboard when that tool changes:
 
+Portuguese (pt-BR) support has its own scoreboard. Run it whenever
+`references/pt-br/`, `scripts/_lang.py`, or the pt-BR paths of the scanner,
+constraint extractor, or readability script change. It also verifies that every
+English output still matches the frozen baseline in
+`evals/golden/ptbr-english-baseline.json`:
+
+```bash
+python3 evals/check_ptbr.py
+```
+
 ```bash
 python3 evals/check_mimic.py --all
 python3 evals/check_voice.py --all

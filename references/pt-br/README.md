@@ -8,27 +8,29 @@ Trate o texto como pt-BR quando o usuário disser, ou quando palavras como "de",
 
 ## 2. Situação dos scripts em pt-BR
 
-Os scripts foram feitos para inglês. Até a fase 2 da extensão (ver `docs/specs/pt-br.md`), **em pt-BR substitua o bloco de scripts de `references/commands/rewrite.md` e da validação do contrato pelo fluxo da seção 3 deste arquivo.** Não é preciso rodar os três scripts que recusam.
+**Em pt-BR, use o fluxo da seção 3 deste arquivo no lugar do bloco de scripts de `references/commands/rewrite.md` e da lista de validação do contrato.** Os scripts abaixo detectam português sozinhos; `--lang pt-br` força o modo, `--lang en` força o inglês.
 
 | Script | Em pt-BR | O que fazer |
 |---|---|---|
-| `banned_phrase_scan.py` | **Recusa** (`non_english: true`, zero achados) | Aplicar o [catálogo pt-BR](taboo-phrases.md) manualmente |
-| `structure_scan.py`, `silhouette_scan.py` | **Recusam** | Conferir a seção 18 (Estrutura) e a 17 (Pontuação) do catálogo manualmente |
-| `readability_metrics.py` | Roda, mas com fórmula do inglês | Ignorar a nota; se precisar, use o Flesch adaptado (abaixo) |
-| `extract_constraints.py`, `validate_preservation.py` | **Parciais**: pegam anos, mas perdem datas por extenso ("12 de março"), horários ("14h"), quantidades ("27 horas") e números de normas ("nº 615"); leem o separador de milhar brasileiro como número de versão ("1.284" vira `version`) e podem marcar vocativos ("Senhor Presidente") como nome próprio | Rodar, e **também** listar à mão números, datas, valores, normas e nomes do original e conferir um a um no resultado |
+| `banned_phrase_scan.py` | **Funciona** com o pacote enxuto `phrases.json` (saída com `"language": "pt-br"`). Pega só expressões fortes e literais | Rodar. Depois percorrer o [catálogo](taboo-phrases.md), porque o vocabulário amplo ("robusto", "cenário", "fundamental") fica para o seu julgamento |
+| `extract_constraints.py`, `validate_preservation.py` | **Funcionam** com formatos brasileiros: "1.284", "R$ 1.200,00", "4 de dezembro", "14h", "27 horas", "Resolução CNJ nº 615/2025", "sala 203"; não tomam vocativo por nome próprio | Rodar passando os arquivos como argumento. Conferir à mão citações e negações |
+| `readability_metrics.py` | **Funciona** com o Flesch adaptado (`flesch_reading_ease_pt`) e palavras vazias em português | Usar `flesch_reading_ease_pt`; ignorar `flesch_kincaid_grade`, que é calibrado para inglês |
+| `structure_scan.py`, `silhouette_scan.py` | **Recusam** (fase 3) | Conferir a seção 18 (Estrutura) e a 17 (Pontuação) do catálogo manualmente |
 | `diff_check.py` | Funciona | Usar normalmente. O alerta *Excessive change* (mais de 40% alterado) é **informativo** quando tudo o que saiu é vício confirmado; registre-o, mas não bloqueie |
+
+Texto curto (menos de 15 palavras) só é reconhecido como português se tiver marca ortográfica (ç, -ção, -ão); na dúvida, passe `--lang pt-br`.
 
 **Alerta de negação** (`Negation count dropped`) de `validate_preservation.py`: aceitável quando a negação estava dentro de um trecho vazio apagado (ex.: paralelismo negativo). Releia as negações que **ficaram** e confirme que nenhuma afirmação se inverteu.
 
-**Zero achados de um script que recusou não significa texto limpo.** Nunca devolva o texto como "sem problemas" só porque os scripts não acharam nada.
+**Zero achados não significa texto limpo.** O detector pt-BR só cobre o pacote de alto sinal, e os scripts de estrutura ainda recusam. Nunca devolva o texto como "sem problemas" sem percorrer o catálogo.
 
-**Flesch adaptado ao português (Martins et al., 1996):** `248,835 − 1,015 × (palavras/frases) − 84,6 × (sílabas/palavras)`. Escala: 75–100 muito fácil; 50–75 fácil; 25–50 difícil; 0–25 muito difícil. Use só como indicador; não é meta.
+**Flesch adaptado ao português (Martins et al., 1996),** calculado por `readability_metrics.py`: `248,835 − 1,015 × (palavras/frases) − 84,6 × (sílabas/palavras)`. Escala: 75–100 muito fácil; 50–75 fácil; 25–50 difícil; 0–25 muito difícil. Use só como indicador; não é meta.
 
 ## 3. Fluxo
 
 1. Leia o texto inteiro antes de qualquer verificação.
 2. Liste as restrições do original: números, datas, valores, percentuais, normas, nomes próprios, citações, negações e condicionais.
-3. Percorra o [catálogo](taboo-phrases.md) e marque as ocorrências suspeitas.
+3. Rode `banned_phrase_scan.py` e `extract_constraints.py`; depois percorra o [catálogo](taboo-phrases.md) e marque as demais ocorrências suspeitas.
 4. Para cada suspeita, confirme o defeito no contexto e passe pelas **proteções** (seção 19 do catálogo). Sem defeito confirmado, não edite.
 5. Reescreva só os trechos confirmados, na voz da predefinição escolhida.
 6. Valide: confira a lista do passo 2 no resultado, item por item, e rode `validate_preservation.py original.txt transformed.txt` e `diff_check.py original.txt transformed.txt` (passe os arquivos como argumento; a entrada por `<<<` pode travar em alguns ambientes). Em pt-BR, estes dois scripts e a conferência manual **substituem** a lista de validação do contrato.

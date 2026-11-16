@@ -17,7 +17,12 @@ import argparse
 import sys
 import re
 import json
+from pathlib import Path
 from typing import TypedDict
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _lang import should_route_portuguese  # noqa: E402
 
 
 class Constraint(TypedDict):
@@ -98,8 +103,10 @@ PROPER_NOUN_INDICATORS = [
 ]
 
 
-def extract_constraints(text: str) -> list[Constraint]:
+def extract_constraints(text: str, lang: str = "auto") -> list[Constraint]:
     """Extract all must-preserve constraints from text."""
+    if lang == "pt-br" or (lang == "auto" and should_route_portuguese(text)):
+        return extract_constraints_ptbr(text)
     constraints: list[Constraint] = []
     seen_spans: set[tuple[int, int]] = set()
 
@@ -160,11 +167,87 @@ def extract_constraints(text: str) -> list[Constraint]:
     return constraints
 
 
+# --- pt-BR patterns (docs/specs/pt-br.md, phase 2) ---------------------------
+# Brazilian formats: thousands with ".", decimals with ",", dates written out,
+# "14h" times, norms ("Resolução CNJ nº 615/2025"). Type names avoid the "date"
+# prefix so validate_preservation.py does not apply its English month logic;
+# these types require the literal value to survive.
+
+_PT_MONTHS = (
+    "janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro"
+)
+_PT_UNITS = (
+    "servidor(?:es)?|processos?|atendimentos?|pessoas?|usuários?|participantes?|vagas?|"
+    "turmas?|horas?|minutos?|dias?|semanas?|meses|mês|anos?|encontros?|aulas?|unidades?|"
+    "páginas?|eleitores?|seções|seção|zonas?|municípios?|votos?"
+)
+PT_BR_PATTERNS: dict[str, str] = {
+    "moeda_brl": r"R\$\s?\d{1,3}(?:\.\d{3})*(?:,\d{2})?(?:\s+(?:mil|milhões|milhão|bilhões|bilhão))?",
+    "norma": (
+        r"\b(?:Lei(?:\s+Complementar)?|Decreto(?:-Lei)?|Resolução|Portaria|Instrução\s+Normativa|"
+        r"Medida\s+Provisória|Emenda\s+Constitucional|Súmula|Provimento|Acórdão)"
+        r"(?:\s+[A-Z][A-Za-z-]*)*\s+n[º°o]\.?\s*\d[\d.]*(?:/\d{2,4})?"
+    ),
+    "data_extenso": rf"\b\d{{1,2}}º?\s+de\s+(?:{_PT_MONTHS})(?:\s+de\s+\d{{4}})?\b",
+    "mes_ano": rf"\b(?:{_PT_MONTHS})\s+de\s+\d{{4}}\b",
+    "data_br": r"\b\d{1,2}/\d{1,2}/\d{2,4}\b",
+    "hora": r"\b\d{1,2}h(?:\d{2})?(?:min)?\b|\b\d{1,2}:\d{2}\b",
+    "percentual": r"\d+(?:,\d+)?\s?%",
+    "quantidade": rf"\b\d{{1,3}}(?:\.\d{{3}})*(?:,\d+)?\s+(?:{_PT_UNITS})\b",
+    "local": r"\b(?:sala|andar|bloco|ramal|gabinete)\s+\d+[A-Za-z]?\b",
+    "numero_br": r"(?<![\d.,])\d{1,3}(?:\.\d{3})+(?:,\d+)?(?![\d.,])|(?<![\d.,])\d+,\d+(?![\d.,])",
+}
+# Language-neutral English patterns still worth keeping for pt-BR text.
+_PT_BR_GENERIC_KEYS = ("date_iso", "year", "range", "url", "email", "code", "quote", "api_endpoint")
+_PT_BR_PROPER_NOUN = (
+    r"\b[A-ZÀ-Ý][a-zà-ÿ]+(?:\s+(?:de|da|do|das|dos|e)\s+[A-ZÀ-Ý][a-zà-ÿ]+|\s+[A-ZÀ-Ý][a-zà-ÿ]+)+\b"
+)
+# Forms of address open a vocative ("Senhor Presidente"), not a proper noun.
+_PT_BR_TREATMENTS = frozenset({
+    "Senhor", "Senhora", "Prezado", "Prezada", "Prezados", "Prezadas", "Excelentíssimo",
+    "Excelentíssima", "Ilustríssimo", "Ilustríssima", "Vossa", "Caro", "Cara",
+})
+_PT_BR_CASE_INSENSITIVE = {"data_extenso", "mes_ano", "quantidade", "local"}
+
+
+def _overlaps(span: tuple[int, int], seen: list[tuple[int, int]]) -> bool:
+    return any(not (span[1] <= start or span[0] >= end) for start, end in seen)
+
+
+def extract_constraints_ptbr(text: str) -> list[Constraint]:
+    """Extract must-preserve constraints from pt-BR text."""
+    constraints: list[Constraint] = []
+    seen: list[tuple[int, int]] = []
+
+    def claim(ctype: str, match: re.Match[str]) -> None:
+        span = (match.start(), match.end())
+        if _overlaps(span, seen):
+            return
+        seen.append(span)
+        constraints.append({"type": ctype, "value": match.group(), "start": span[0], "end": span[1]})
+
+    patterns = list(PT_BR_PATTERNS.items()) + [(k, PATTERNS[k]) for k in _PT_BR_GENERIC_KEYS]
+    for ctype, pattern in patterns:
+        flags = re.IGNORECASE if ctype in _PT_BR_CASE_INSENSITIVE else 0
+        for match in re.finditer(pattern, text, flags):
+            claim(ctype, match)
+
+    for match in re.finditer(_PT_BR_PROPER_NOUN, text):
+        if match.group().split()[0] in _PT_BR_TREATMENTS:
+            continue
+        claim("proper_noun", match)
+
+    constraints.sort(key=lambda c: c["start"])
+    return constraints
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Extract must-preserve constraints from input text."
     )
     parser.add_argument("path", nargs="?", help="Path to input text file (default: read stdin)")
+    parser.add_argument("--lang", choices=("auto", "en", "pt-br"), default="auto",
+                        help="Constraint patterns to use (default: auto)")
     return parser.parse_args(argv)
 
 
@@ -186,7 +269,7 @@ def main() -> None:
         print(json.dumps({"error": "No input provided", "constraints": []}))
         sys.exit(1)
 
-    constraints = extract_constraints(text)
+    constraints = extract_constraints(text, lang=args.lang)
 
     output = {
         "input_length": len(text),

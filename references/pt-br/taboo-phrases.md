@@ -39,9 +39,9 @@ Atrasam o conteúdo. Normalmente basta apagar e começar pela informação.
 | Expressão | Sev. | Troca |
 |---|---|---|
 | "Vale ressaltar que" / "Vale destacar que" / "Vale lembrar que" | forte | apagar |
-| "É importante destacar/ressaltar/salientar/mencionar que" | forte | apagar |
+| "É importante destacar que" / "É importante ressaltar que" / "É importante salientar que" / "É importante mencionar que" | forte | apagar |
 | "Cabe destacar que" / "Cabe ressaltar que" | forte | apagar (manter "cabe" só quando indica competência: "cabe à TI") |
-| "É fundamental entender/compreender que" | forte | apagar |
+| "É fundamental entender que" / "É fundamental compreender que" | forte | apagar |
 | "Antes de mais nada," | fraca | apagar |
 | "A verdade é que" / "O fato é que" | forte | apagar |
 | "Sejamos sinceros:" / "Vamos combinar:" / "Vamos ser honestos:" | forte | apagar |
@@ -86,7 +86,7 @@ Palavras que aparecem em texto de IA muito acima da frequência humana. Fraca is
 | "intrincado", "multifacetado", "nuances" | fraca | complexo; ou listar as facetas |
 | "panorama", "paradigma", "pilar", "catalisador" (figurados) | fraca | apagar ou dizer o concreto |
 | "fomentar", "elevar", "aprimorar" (vagos) | fraca | dizer o que muda |
-| "destravar/desbloquear o potencial" | forte | dizer o resultado |
+| "destravar o potencial" / "desbloquear o potencial" | forte | dizer o resultado |
 | "um verdadeiro divisor de águas", "virada de chave", "game changer" | forte | dizer o que mudou |
 | "solução" / "abordagem" (vagas, sem dizer qual) | fraca | nomear a ferramenta, o método |
 
@@ -165,7 +165,7 @@ Nega algo que ninguém afirmou para depois apresentar a "verdadeira" ideia.
 
 | Padrão | Sev. | Troca |
 |---|---|---|
-| "Não se trata apenas de X, mas de Y" | forte | dizer Y; se Y for vazio ("trata-se de pessoas"), apagar a frase inteira |
+| "Não se trata apenas de X, mas de Y" / "Não se trata só de X" | forte | dizer Y; se Y for vazio ("trata-se de pessoas"), apagar a frase inteira |
 | "Não é só X. É Y." / "Não é sobre X. É sobre Y." | forte | dizer Y |
 | "Mais do que X, é Y" | fraca | dizer Y |
 | "X? Não. Y." | forte | dizer Y |

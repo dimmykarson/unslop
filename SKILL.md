@@ -31,7 +31,7 @@ For audits and rewrites, [the core contract](references/core-contract.md) govern
 
 ## Portuguese (pt-BR)
 
-For Portuguese input, read [references/pt-br/README.md](references/pt-br/README.md) before acting. The phrase, structure, and silhouette scanners decline Portuguese, so their zero findings are not evidence of clean text; apply the [pt-BR catalog](references/pt-br/taboo-phrases.md) instead and answer in Portuguese.
+For Portuguese input, read [references/pt-br/README.md](references/pt-br/README.md) before acting. The phrase scanner, constraint extractor, and readability script detect pt-BR; the structure and silhouette scanners still decline it. Zero findings are not evidence of clean text: also apply the [pt-BR catalog](references/pt-br/taboo-phrases.md) and answer in Portuguese.
 
 ## Output Format
 

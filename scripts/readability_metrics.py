@@ -20,7 +20,13 @@ import sys
 import re
 import json
 from collections import Counter
+from collections.abc import Callable
+from pathlib import Path
 from typing import TypedDict
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _lang import should_route_portuguese  # noqa: E402
 
 
 class ReadabilityMetrics(TypedDict):
@@ -104,9 +110,11 @@ def split_words(text: str) -> list[str]:
     return [w for w in words if w]
 
 
-def calculate_metrics(text: str) -> ReadabilityMetrics:
+def calculate_metrics(
+    text: str, sentence_splitter: Callable[[str], list[str]] | None = None
+) -> ReadabilityMetrics:
     """Calculate all readability metrics."""
-    sentences = split_sentences(text)
+    sentences = (sentence_splitter or split_sentences)(text)
     words = split_words(text)
     paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
 
@@ -258,11 +266,95 @@ def calculate_metrics(text: str) -> ReadabilityMetrics:
     }
 
 
+# --- pt-BR (docs/specs/pt-br.md, phase 2) ------------------------------------
+# Flesch reading ease adapted to Portuguese (Martins et al., 1996):
+#   248.835 - 1.015 * words/sentence - 84.6 * syllables/word
+# Scale: 75-100 very easy, 50-75 easy, 25-50 hard, 0-25 very hard. The
+# Flesch-Kincaid grade and its "High reading level" flag are English-calibrated,
+# so they are not used to judge pt-BR text.
+
+_PT_VOWELS = "aeiouáéíóúâêôãõàü"
+PT_STOP_WORDS = frozenset({
+    "a", "o", "as", "os", "um", "uma", "uns", "umas", "de", "do", "da", "dos", "das",
+    "em", "no", "na", "nos", "nas", "por", "pelo", "pela", "pelos", "pelas", "para",
+    "com", "sem", "sob", "sobre", "entre", "ao", "aos", "à", "às", "e", "ou", "mas",
+    "que", "se", "não", "é", "são", "foi", "foram", "ser", "está", "estão", "como",
+    "mais", "muito", "já", "também", "isso", "este", "esta", "esse", "essa", "seu",
+    "sua", "seus", "suas", "ele", "ela", "eles", "elas", "nós", "você", "quando",
+    "onde", "porque", "até", "após", "há", "tem", "têm",
+})
+
+
+def count_syllables_pt(word: str) -> int:
+    """Approximate Portuguese syllables: one per vowel group, plus one when an
+    accented í/ú breaks a group into a hiatus (saúde, país). Diphthongs and
+    nasal groups (ão, õe) stay one syllable; silent u in qu/gu joins its vowel."""
+    word = word.lower().strip()
+    if not word:
+        return 0
+    count = 0
+    prev_is_vowel = False
+    for index, char in enumerate(word):
+        is_vowel = char in _PT_VOWELS
+        if is_vowel and not prev_is_vowel:
+            count += 1
+        elif is_vowel and prev_is_vowel and char in "íú" and index > 0:
+            count += 1
+        prev_is_vowel = is_vowel
+    return max(1, count)
+
+
+def split_sentences_pt(text: str) -> list[str]:
+    # split_sentences() only starts a sentence at an unaccented capital, which
+    # would glue "... prazo. É importante ..." into one sentence.
+    parts = re.split(r'(?<=[.!?])["”]?\s+(?=["“]?[A-ZÀ-Ý])', text)
+    return [p.strip() for p in parts if p.strip()]
+
+
+def flesch_reading_ease_pt(text: str) -> float:
+    sentences = split_sentences_pt(text)
+    words = split_words(text)
+    if not sentences or not words:
+        return 0.0
+    words_per_sentence = len(words) / len(sentences)
+    syllables_per_word = sum(count_syllables_pt(w) for w in words) / len(words)
+    return round(248.835 - 1.015 * words_per_sentence - 84.6 * syllables_per_word, 1)
+
+
+def calculate_metrics_ptbr(text: str) -> dict:
+    """Readability for pt-BR: language-neutral cadence metrics from
+    calculate_metrics, Portuguese reading ease, Portuguese stop words."""
+    metrics: dict = dict(calculate_metrics(text, sentence_splitter=split_sentences_pt))
+    ease = flesch_reading_ease_pt(text)
+    content_words = [w for w in split_words(text) if w not in PT_STOP_WORDS and len(w) > 2]
+    word_freq = Counter(content_words)
+    repeated = sum(c for c in word_freq.values() if c >= 3)
+    repetition_score = repeated / len(content_words) * 100 if content_words else 0
+
+    english_only = ("High reading level", "High word repetition")
+    flags = [f for f in metrics["flags"] if not f.startswith(english_only)]
+    if repetition_score > 15:
+        flags.append(f"Repetição alta de palavras ({repetition_score:.1f}%)")
+    if content_words and ease < 25:
+        flags.append(f"Leitura muito difícil (Flesch PT {ease:.1f})")
+
+    metrics.update({
+        "language": "pt-br",
+        "flesch_reading_ease_pt": ease,
+        "word_repetition_score": round(repetition_score, 1),
+        "top_repeated_words": sorted(word_freq.items(), key=lambda x: x[1], reverse=True)[:10],
+        "flags": flags,
+    })
+    return metrics
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Calculate readability metrics for transformed text."
     )
     parser.add_argument("path", nargs="?", help="Path to input text file (default: read stdin)")
+    parser.add_argument("--lang", choices=("auto", "en", "pt-br"), default="auto",
+                        help="Readability formula and stop words (default: auto)")
     return parser.parse_args(argv)
 
 
@@ -284,8 +376,12 @@ def main() -> None:
         print(json.dumps({"error": "No input provided"}))
         sys.exit(1)
 
-    metrics = calculate_metrics(text)
-    print(json.dumps(metrics, indent=2))
+    if args.lang == "pt-br" or (args.lang == "auto" and should_route_portuguese(text)):
+        metrics = calculate_metrics_ptbr(text)
+        print(json.dumps(metrics, indent=2, ensure_ascii=False))
+    else:
+        metrics = calculate_metrics(text)
+        print(json.dumps(metrics, indent=2))
 
     # Exit with 1 if any flags (warnings)
     sys.exit(1 if metrics["flags"] else 0)
