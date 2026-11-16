@@ -29,9 +29,13 @@ For audits and rewrites, [the core contract](references/core-contract.md) govern
 | voice check, does this sound like me? | [references/commands/mimic.md](references/commands/mimic.md#voice-check) |
 | add a newly observed AI tell to the library | [references/commands/contribute.md](references/commands/contribute.md) |
 
+## Portuguese (pt-BR)
+
+For Portuguese input, read [references/pt-br/README.md](references/pt-br/README.md) before acting. The phrase, structure, and silhouette scanners decline Portuguese, so their zero findings are not evidence of clean text; apply the [pt-BR catalog](references/pt-br/taboo-phrases.md) instead and answer in Portuguese.
+
 ## Output Format
 
-Before writing, read the selected voice preset in `presets/`. The default is `crisp`; `--preset` also accepts `warm`, `expert`, and `story`.
+Before writing, read the selected voice preset in `presets/`. The default is `crisp`; `--preset` also accepts `warm`, `expert`, `story`, and `oficial` (Brazilian official correspondence, `presets/official-ptbr.md`).
 
 Return the cleaned text for a rewrite. For a report, give **Issues Found** (span, category, severity, contextual reason) and **Assessment** (confirmed defects and judgment calls). Preserve the original text in report mode.
 

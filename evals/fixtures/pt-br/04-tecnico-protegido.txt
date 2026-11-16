@@ -1,0 +1,1 @@
+Para estimar o tempo médio de tramitação, utilizou-se um estimador robusto, menos sensível aos processos com tramitação atípica. O resultado mostrou-se robusto a diferentes recortes temporais. No que tange à amostra, foram considerados 3.412 processos autuados entre janeiro de 2024 e junho de 2026, excluídos os sigilosos.
